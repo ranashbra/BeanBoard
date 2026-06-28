@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login | BeanBoard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:       #1a1612;
+  --ink-soft:  #3d3530;
+  --ink-muted: #7a6f68;
+  --cream:     #f5f0eb;
+  --cream-dark:#ede5db;
+  --parchment: #e8ddd2;
+  --border:    rgba(26,22,18,0.12);
+  --border-mid:rgba(26,22,18,0.22);
+  --surface:   #ffffff;
+  --danger:    #9b2318;
+  --danger-soft: rgba(155,35,24,0.08);
+  --radius:    8px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 2px 6px rgba(26,22,18,0.06);
+  --shadow-md: 0 8px 28px rgba(26,22,18,0.10);
+  --shadow-lg: 0 20px 60px rgba(26,22,18,0.14);
+  --tr: 220ms cubic-bezier(.4,0,.2,1);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--cream); color: var(--ink);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh; display: flex; flex-direction: column;
+}
+
+/* split background */
+body {
+  background: linear-gradient(to right, var(--ink) 45%, var(--cream) 45%);
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.5;
+}
+body > * { position: relative; z-index: 1; }
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes steamCurl {
+  0%{opacity:0;transform:translateY(0) scaleX(1)} 20%{opacity:.7}
+  60%{opacity:.3;transform:translateY(-8px) scaleX(1.1) rotate(3deg)}
+  100%{opacity:0;transform:translateY(-16px) scaleX(.8) rotate(-2deg)}
+}
+@keyframes shimmer { 0%{background-position:0% center} 100%{background-position:-250% center} }
+@keyframes cupWobble {
+  0%,100%{transform: rotate(-2deg)} 50%{transform: rotate(2deg)}
+}
+@keyframes steamLoop {
+  0%{opacity:0;transform:translateY(0)} 30%{opacity:.8} 80%{opacity:.2} 100%{opacity:0;transform:translateY(-24px)}
+}
+
+/* ── HEADER ── */
+.site-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(26,22,18,0.92); backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(245,240,235,0.12);
+}
+.nav-wrap {
+  max-width: 1120px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 28px;
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-icon {
+  width: 40px; height: 40px;
+  background: rgba(245,240,235,0.1); border: 1px solid rgba(245,240,235,0.2);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.brand-icon svg { width: 22px; height: 22px; color: var(--cream); }
+.brand-icon .st { animation: steamCurl 2.8s ease-in-out infinite; opacity: 0; stroke: rgba(245,240,235,0.6); }
+.brand-icon .st2 { animation-delay: 1.1s; }
+.brand-name {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 700; font-size: 22px; letter-spacing: 0.01em;
+  color: var(--cream);
+}
+.nav-links { display: flex; gap: 2px; list-style: none; }
+.nav-links a {
+  display: inline-block; padding: 8px 15px; font-size: 13.5px; font-weight: 500;
+  color: rgba(245,240,235,0.55); border-radius: var(--radius);
+  transition: color var(--tr); position: relative;
+}
+.nav-links a::after {
+  content: ''; position: absolute; bottom: 2px; left: 15px; right: 15px;
+  height: 1.5px; background: var(--cream);
+  transform: scaleX(0); transform-origin: left; transition: transform var(--tr);
+}
+.nav-links a:hover { color: var(--cream); }
+.nav-links a:hover::after { transform: scaleX(1); }
+.nav-links a.active { color: var(--cream); font-weight: 700; }
+.nav-links a.active::after { transform: scaleX(1); }
+
+/* ── LOGIN LAYOUT ── */
+.login-shell {
+  flex: 1; display: flex; align-items: stretch;
+}
+
+/* Left panel — dark coffee side */
+.login-left {
+  width: 45%; flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 60px 52px; text-align: center;
+}
+
+.coffee-cup-wrap {
+  position: relative; margin-bottom: 36px;
+  display: inline-block;
+}
+.coffee-cup-big {
+  font-size: 80px; display: block;
+  animation: cupWobble 5s ease-in-out infinite;
+}
+.steam-lines {
+  position: absolute; bottom: 88%; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 8px;
+}
+.sl {
+  width: 3px; height: 24px; border-radius: 2px;
+  background: rgba(245,240,235,0.25);
+  animation: steamLoop 2.5s ease-in-out infinite;
+}
+.sl:nth-child(2) { animation-delay: 0.5s; height: 18px; }
+.sl:nth-child(3) { animation-delay: 1s; height: 20px; }
+
+.login-left h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 30px; font-weight: 900; color: var(--cream); margin-bottom: 12px;
+  line-height: 1.15;
+}
+.login-left h2 em { font-style: italic; color: rgba(245,240,235,0.65); }
+.login-left p {
+  font-size: 14px; color: rgba(245,240,235,0.45); line-height: 1.8; max-width: 260px;
+}
+
+.bean-row {
+  display: flex; gap: 10px; justify-content: center; margin-top: 28px; align-items: center;
+}
+.bean-row .bean {
+  width: 22px; height: 16px;
+  opacity: 0.25;
+  animation: beanPop 2.4s ease-in-out infinite;
+}
+.bean-row .bean.b2 { animation-delay: 0.4s; }
+.bean-row .bean.b3 { animation-delay: 0.8s; }
+.bean-row .bean.b4 { animation-delay: 1.2s; }
+.bean-row .bean.b5 { animation-delay: 1.6s; }
+@keyframes beanPop {
+  0%, 100% { opacity: 0.2; transform: scale(0.85) rotate(-10deg); }
+  40%       { opacity: 0.85; transform: scale(1.1) rotate(5deg); }
+  70%       { opacity: 0.5; transform: scale(1.0) rotate(0deg); }
+}
+
+/* Right panel — cream card side */
+.login-right {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  padding: 60px 52px;
+}
+
+.login-card {
+  width: 100%; max-width: 400px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 44px 40px;
+  box-shadow: var(--shadow-lg);
+  animation: fadeUp 600ms ease both;
+}
+
+.mono-tag {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-muted);
+  background: var(--cream-dark); border: 1px solid var(--border-mid);
+  padding: 5px 12px; border-radius: 30px; margin-bottom: 14px;
+}
+
+.login-card h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px; font-weight: 900; color: var(--ink);
+  margin-bottom: 6px; line-height: 1.15;
+}
+.login-card h1 em { font-style: italic; }
+.login-card .lede {
+  font-size: 13.5px; color: var(--ink-muted); margin-bottom: 30px; line-height: 1.65;
+}
+
+/* Form */
+form { margin-top: 0; }
+.form-row { margin-bottom: 20px; }
+.form-row label {
+  display: block; font-family: 'DM Mono', monospace; font-size: 10.5px;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted);
+  margin-bottom: 9px; font-weight: 500;
+}
+input[type="text"], input[type="password"] {
+  width: 100%; background: var(--cream); border: 1px solid var(--border-mid);
+  color: var(--ink); padding: 12px 14px; border-radius: var(--radius);
+  font-size: 14px; font-family: 'Plus Jakarta Sans', inherit;
+  transition: border-color var(--tr), box-shadow var(--tr);
+}
+input:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px rgba(26,22,18,0.08); }
+input.input-error { border-color: var(--danger); box-shadow: 0 0 0 3px var(--danger-soft); }
+.error-msg { color: var(--danger); font-size: 11.5px; margin-top: 5px; display: none; font-style: italic; }
+.error-msg.show { display: block; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--ink); color: var(--cream);
+  border: none; padding: 13px 24px; font-size: 13.5px; font-weight: 700;
+  letter-spacing: 0.03em; border-radius: var(--radius); cursor: pointer;
+  width: 100%; font-family: inherit;
+  transition: filter var(--tr), transform var(--tr), box-shadow var(--tr);
+  box-shadow: var(--shadow-sm);
+}
+.btn:hover { filter: brightness(1.2); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.btn:active { transform: scale(0.97); }
+
+/* ── FOOTER ── */
+.site-footer {
+  border-top: 1px solid rgba(245,240,235,0.08); padding: 18px 28px; text-align: center;
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  color: rgba(245,240,235,0.3); letter-spacing: 0.05em;
+  background: var(--ink);
+}
+
+@media (max-width: 720px) {
+  body { background: var(--cream); }
+  .login-left { display: none; }
+  .login-right { padding: 40px 20px; }
+  .site-header { background: rgba(245,240,235,0.88); }
+  .nav-links a { color: var(--ink-muted); }
+  .nav-links a:hover, .nav-links a.active { color: var(--ink); }
+  .brand-icon { background: var(--ink); }
+  .brand-name { -webkit-text-fill-color: var(--ink); color: var(--ink); }
+  .site-footer { background: var(--cream-dark); color: var(--ink-muted); border-top-color: var(--border); }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav-wrap">
+    <div class="brand">
+      <span class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 8.5h13.5v4.8a5.2 5.2 0 0 1-5.2 5.2H8.2A5.2 5.2 0 0 1 3 13.3V8.5Z"/>
+          <path d="M16.5 9.5h1.3a2.2 2.2 0 0 1 0 4.4h-1.3"/>
+          <path d="M4 20.5h13"/>
+          <path class="st"  d="M8 6.2c0-1 1.1-1 1.1-2s-1.1-1-1.1-2"/>
+          <path class="st st2" d="M11.6 6.2c0-1 1.1-1 1.1-2s-1.1-1-1.1-2"/>
+        </svg>
+      </span>
+      <span class="brand-name">BeanBoard</span>
+    </div>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="home-215.html">Beranda</a></li>
+        <li><a href="profile-215.html">Profile</a></li>
+        <li><a href="transaksi-215.html">Transaksi</a></li>
+        <li><a href="login-215.html" class="active">Login</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<div class="login-shell">
+  <!-- Coffee dark panel -->
+  <div class="login-left">
+    <div class="coffee-cup-wrap">
+      <div class="steam-lines">
+        <span class="sl"></span>
+        <span class="sl"></span>
+        <span class="sl"></span>
+      </div>
+      <span class="coffee-cup-big">☕</span>
+    </div>
+    <h2>Selamat<br><em>Datang Kembali</em></h2>
+    <p>Masuk untuk mencatat transaksi kopi hari ini dan pantau pendapatan kedai Anda.</p>
+    <div class="bean-row">
+      <svg class="bean b1" viewBox="0 0 22 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="11" cy="8" rx="10" ry="7" fill="rgba(245,240,235,0.7)" rx="10" ry="7"/>
+        <path d="M11 2 Q14 8 11 14" stroke="rgba(26,22,18,0.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      </svg>
+      <svg class="bean b2" viewBox="0 0 22 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="11" cy="8" rx="10" ry="7" fill="rgba(245,240,235,0.7)"/>
+        <path d="M11 2 Q14 8 11 14" stroke="rgba(26,22,18,0.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      </svg>
+      <svg class="bean b3" viewBox="0 0 22 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="11" cy="8" rx="10" ry="7" fill="rgba(245,240,235,0.7)"/>
+        <path d="M11 2 Q14 8 11 14" stroke="rgba(26,22,18,0.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      </svg>
+      <svg class="bean b4" viewBox="0 0 22 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="11" cy="8" rx="10" ry="7" fill="rgba(245,240,235,0.7)"/>
+        <path d="M11 2 Q14 8 11 14" stroke="rgba(26,22,18,0.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      </svg>
+      <svg class="bean b5" viewBox="0 0 22 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="11" cy="8" rx="10" ry="7" fill="rgba(245,240,235,0.7)"/>
+        <path d="M11 2 Q14 8 11 14" stroke="rgba(26,22,18,0.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Form card panel -->
+  <div class="login-right">
+    <div class="login-card">
+      <span class="mono-tag">Akses Pengguna</span>
+      <h1>Masuk ke <em>Akun</em></h1>
+      <p class="lede">Silakan login untuk mengakses sistem pencatatan transaksi kopi BeanBoard.</p>
+
+      <form id="form-login" novalidate>
+        <div class="form-row">
+          <label for="username">Username</label>
+          <input type="text" id="username" placeholder="Masukkan username">
+          <div class="error-msg">Username tidak boleh kosong.</div>
+        </div>
+        <div class="form-row">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Masukkan password">
+          <div class="error-msg">Password tidak boleh kosong.</div>
+        </div>
+        <button type="submit" class="btn">Login ☕</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  © 2026 BeanBoard by Rana Septiana Shabira — All Rights Reserved.
+</footer>
+
+<script>
+const form     = document.getElementById('form-login');
+const username = document.getElementById('username');
+const password = document.getElementById('password');
+
+function markError(el, msg) {
+  el.classList.add('input-error');
+  const err = el.parentElement.querySelector('.error-msg');
+  if(err){ err.textContent = msg; err.classList.add('show'); }
+}
+function clearError(el) {
+  el.classList.remove('input-error');
+  const err = el.parentElement.querySelector('.error-msg');
+  if(err) err.classList.remove('show');
+}
+
+form.addEventListener('submit', function(e){
+  e.preventDefault();
+  let valid = true;
+  clearError(username); clearError(password);
+
+  if(!username.value.trim()){
+    markError(username, 'Username tidak boleh kosong.');
+    valid = false;
+  }
+  if(!password.value.trim()){
+    markError(password, 'Password tidak boleh kosong.');
+    valid = false;
+  }
+
+  if(!valid){
+    alert('Login gagal. Periksa kembali data Anda.');
+    return;
+  }
+
+  const namaUser = username.value.trim();
+  alert('Login berhasil! Selamat datang, ' + namaUser + '.');
+  window.location.href = 'home-215.html';
+});
+</script>
+
+</body>
+</html>
